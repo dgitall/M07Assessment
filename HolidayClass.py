@@ -15,4 +15,9 @@ class Holiday:
     def __str__ (self):
         # String output
         # Holiday output when printed.
-        return f"{self.name} ({self.date.strftime('%B %d, %Y')})"
+        return f"{self.name} ({self.date.strftime('%b %d, %Y')})"
+    
+    def makeDict(self):
+        output = {'name': self.name, 'date': self.date.strftime('%Y-%M-%d')}
+        return output 
+        

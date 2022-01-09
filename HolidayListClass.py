@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 import json
 import datetime as dt
+from pprintpp import pprint as pp
 
 import HolidayClass as HC
 import HolidayGlobals as gbl
@@ -33,6 +34,8 @@ class HolidayList:
 
         return result
     
+    # Search for the requested holiday in the list. 
+    ## Refactor this to use lambda function in a filter.
     def findHoliday(self, HolidayName, Date):
         # Find Holiday in innerHolidays
         # Return Holiday
@@ -53,13 +56,41 @@ class HolidayList:
         return result, foundHoliday, index  
     
     def removeHoliday(self, HolidayName, Date):
-        result = 0
-        return result
+        result = gbl.RSLT_NONE
+
         # Find Holiday in innerHolidays by searching the name and date combination.
         # remove the Holiday from innerHolidays
         # inform user you deleted the holiday
-
-## Read holidays from the save file at the given location
+        if(isinstance(Date, str)):
+            Date = dt.datetime.strptime(Date, "%Y-%M-%d")     
+    
+        
+        foundresult, holiday, hlyindex = self.findHoliday(HolidayName,Date)
+        if foundresult == gbl.RSLT_FOUND:
+            try:
+                self.innerHolidays.remove(holiday)
+                result = gbl.RSLT_NONE
+            except:
+                print("ERROR: Can't remove holiday")     
+                result = gbl.RSLT_ERROR  
+        else:
+            result = gbl.RSLT_NOTFOUND
+                     
+        
+        return result
+    
+    def findDate(self, DateToFind):
+        date = dt.datetime(1900,1,1)
+        
+        if(DateToFind == gbl.EARLIEST_DATE):
+            pass
+          #  date = reduce(self.)
+        elif(DateToFind == gbl.LATEST_DATE):
+            pass
+        
+        return date
+    
+    ## Read holidays from the save file at the given location
     def read_json(self, filelocation):
         result = gbl.RSLT_NONE
         # Read in things from json file location
@@ -89,12 +120,26 @@ class HolidayList:
                 return gbl.RSLT_ERROR
 
         return result
-    
+
+    def makeDict(self):
+        dictionary = [holiday.makeDict() for holiday in self.innerHolidays]
+        return dictionary
+            
     def save_to_json(self, filelocation):
-        result = 0
-        return result
+        result = gbl.RSLT_NONE
+
         # Write out json file to selected file.
-        
+        holidaysJSON = json.dumps(self.makeDict())
+        holidaysJSON = '{\"holidays\" : ' + holidaysJSON + '}'        
+        try:
+            with open(filelocation, "w") as json_file:
+                json_file.write(holidaysJSON)
+        except:
+            print("ERROR: Could not read from save file")
+            return gbl.RSLT_ERROR
+        return result       
+    
+     
     def scrapeHolidays(self):
         # Scrape Holidays from https://www.timeanddate.com/holidays/us/ 
         # Remember, 2 previous years, current year, and 2  years into the future. You can scrape multiple years by adding year to the timeanddate URL. For example https://www.timeanddate.com/holidays/us/2022

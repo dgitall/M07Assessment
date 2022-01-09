@@ -12,8 +12,13 @@ import HolidayGlobals as gbl
 # Include unit tests below to test this before including in the full program
 class WebScraper:
     def getHTML(self, url):
-        response = requests.get(url)
-        return response.text
+        try:
+            response = requests.get(url)
+            result = response.text
+        except:
+            result = "ERRORERRORERROR"
+            
+        return result
     
     def scrape(self, year):
         result = gbl.RSLT_NONE
@@ -35,7 +40,7 @@ class WebScraper:
             try:
                 date = dt.datetime.strptime(f"{year} {date}", "%Y %b %d")
             except:
-                date = "None"
+                date = dt.datetime(1900,1,1)
             name = cells[1].a.text
             holiday = HC.Holiday(name, date)  
             holidays.append(holiday)

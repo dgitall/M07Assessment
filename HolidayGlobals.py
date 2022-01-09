@@ -4,6 +4,7 @@ import json
 RSLT_NONE = 0
 RSLT_STOP = -1
 RSLT_ERROR = -2
+RSLT_EXIT = -3
 
 RSLT_NOTFOUND = -10
 RSLT_FOUND = -11
@@ -14,12 +15,13 @@ RSLT_FINALWON = -15
 RSLT_FINALLOST = -15
 RSLT_GAMEEND = -16
 
-WHEEL_BANKRUPT = -1
-WHEEL_BANKRUPT2 = -2
+EARLIEST_DATE = -1
+LATEST_DATE = -2
 WHEEL_MILLION = -3
 WHEEL_LOSETURN = -4
 
 SaveFilePathJSON = "Data/holidays.json"
+SaveFilePathJSONTest = "Data/holidays-test.json"
 
 # Load the string dictionary from the JSON file
 StringRscs = {}

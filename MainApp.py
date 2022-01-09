@@ -1,8 +1,8 @@
-import datetime
+import datetime as dt
 import json
 
 
-import HolidayClass as hc
+import HolidayClass as HC
 import HolidayListClass as hlc
 import HolidayGlobals as gbl
 
@@ -32,16 +32,18 @@ def main():
     while ApplicationRun:
         
         MenuSelection = MainMenu()
-        """ if MenuSelection == 1:
-            NewEntrant()
+        if MenuSelection == 1:
+            AddHoliday(HolidayList)
         elif MenuSelection == 2:
-            CancelEntrant()
+            RemoveHoliday(HolidayList)
         elif MenuSelection == 3:
-            ViewParticipants()
-        elif MenuSelection == 4:
-            SaveFile()
+            SaveHolidayList(HolidayList)
         elif MenuSelection == 5:
-            ApplicationRun = ExitApp()     """
+            if( ExitApp() == gbl.RSLT_EXIT):
+                ApplicationRun = False       
+        """ elif MenuSelection == 4:
+            SaveFile()
+     """
     
     return result
 
@@ -54,16 +56,22 @@ def ProgramStartup():
         HolidayList = hlc.HolidayList()
     except:
         HolidayList = None
-        return gbl.RSLT_ERROR 
+        return gbl.RSLT_ERROR, HolidayList 
        
     HolidayList.read_json(gbl.SaveFilePathJSON)
         
-    length = HolidayList.numHolidays
+    length = HolidayList.numHolidays()
     print(gbl.fstr(gbl.StringRscs['StartNumberLoaded'], locals()))   
     print("\n")
     userinput = input(gbl.StringRscs['StartWebscrapingPrompt'])
     if(userinput in ('y','Y')):
-        HolidayList.scrapeHolidays()     
+        scrapingresult = HolidayList.scrapeHolidays()     
+        if(scrapingresult == gbl.RSLT_NONE):
+            length = HolidayList.numHolidays()
+            print(gbl.fstr(gbl.StringRscs['StartWebscrapingComplete'], locals()))
+        else:
+            print("ERROR: Program Start unable to scrape web for holidays")
+            result = gbl.RSLT_ERROR
     
     return result, HolidayList
     
@@ -84,6 +92,141 @@ def MainMenu():
 
     return Selection
 
+def AddHoliday(HolidayList):
+    result = gbl.RSLT_NONE
+    
+    # Display the banner
+    print("\n\n" + gbl.StringRscs['AddBanner'])
+    # Get the Holiday Name and Date from the user
+    name = ''
+    date = dt.datetime(1900,1,1)
+    # Get the name of the holiday from the user
+    userinput = 0
+    InvalidEntry = True
+    while InvalidEntry:
+        userinput = input(gbl.StringRscs['AddNamePrompt'])
+        # Validate selection
+        if (len(userinput) > 0) and (isinstance(userinput, str)):
+            name = userinput
+            InvalidEntry = False
+    # Get the date of the holiday from the user
+    userinput = 0
+    InvalidEntry = True
+    while InvalidEntry:
+        userinput = input(gbl.StringRscs['AddDatePrompt'])
+        # Validate selection
+        if (len(userinput) > 0) and (isinstance(userinput, str)):
+            # Check if converting the date in the expected format works
+            try:
+                date = dt.datetime.strptime(userinput, "%b %d, %Y")
+                InvalidEntry = False              
+            except:
+                print(gbl.StringRscs['AddDateError'])
+
+    holiday = HC.Holiday(name, date)
+    # Check if a duplicate
+    foundresult, hldy, index = HolidayList.findHoliday(holiday.name,holiday.date)
+    # If not found, then create a new holiday object to add to the list
+    if foundresult == gbl.RSLT_NOTFOUND:
+        if(HolidayList.addHoliday(holiday) != gbl.RSLT_NONE):
+            print("ERROR: Can't add holiday from user")
+            return gbl.RSLT_ERROR
+        else:
+            print(gbl.StringRscs['AddSuccess1'])
+            print(gbl.fstr(gbl.StringRscs['AddSuccess2'], locals()))
+    elif foundresult != gbl.RSLT_FOUND:
+        print("ERROR: Error in find within add holiday")
+        return gbl.RSLT_ERROR    
+    else:
+        print(gbl.StringRscs['AddDuplicateError1'])
+        print(gbl.fstr(gbl.StringRscs['AddDuplicateError2'], locals()))
+        
+    return result 
+
+def RemoveHoliday(HolidayList):
+    result = gbl.RSLT_NONE
+    
+    # Display the banner
+    print("\n\n" + gbl.StringRscs['RemoveBanner'])
+    
+    # Get the Holiday Name and Date from the user
+    name = ''
+    date = dt.datetime(1900,1,1)
+    userinput = 0
+    InvalidEntry = True
+    while InvalidEntry:
+        userinput = input(gbl.StringRscs['RemoveNamePrompt'])
+        # Validate selection
+        if (len(userinput) > 0) and (isinstance(userinput, str)):
+            name = userinput
+            InvalidEntry = False
+
+    removeall = False
+    userinput = 0
+    InvalidEntry = True
+    while InvalidEntry:
+        userinput = input(gbl.StringRscs['RemoveDatePrompt'])
+        # Validate selection
+        if (len(userinput) > 0) and (isinstance(userinput, str)):
+            # Check if converting the date in the expected format works
+            try:
+                date = dt.datetime.strptime(userinput, "%b %d, %Y")
+                InvalidEntry = False      
+                removeall = False        
+            except:
+                print(gbl.StringRscs['AddDateError'])
+        # If they didn't enter anything then remove all with that name
+        elif len(userinput)==0:
+            removeall = True
+                
+    if(removeall):
+        numberremoved = 0
+        pass
+    else:
+        # Call the list method to remove the holiday
+        removeresult = HolidayList.removeHoliday(name,date)
+        # If not found, then create a new holiday object to add to the list
+        if removeresult == gbl.RSLT_NOTFOUND:
+            print(gbl.StringRscs['RemoveNotFoundError1'])
+            print(gbl.fstr(gbl.StringRscs['RemoveNotFoundError2'], locals()))    
+        elif removeresult == gbl.RSLT_NONE:
+            print(gbl.StringRscs['RemoveSuccess1'])
+            print(gbl.fstr(gbl.StringRscs['RemoveSuccess2'], locals()))             
+        elif removeresult == gbl.RSLT_ERROR:          
+            print(gbl.StringRscs['RemoveError'])
+
+        
+    return result 
+
+def SaveHolidayList(HolidayList):
+    result = gbl.RSLT_NONE
+    
+    print(gbl.StringRscs['SaveBanner'])
+    userinput = input(gbl.StringRscs['SavePrompt'])
+    if(userinput in ('y','Y')):
+        result = HolidayList.save_to_json(gbl.SaveFilePathJSON)    
+        if(result == gbl.RSLT_NONE):
+            print(gbl.StringRscs['SaveSuccess'])
+        else:
+            print(gbl.StringRscs['SaveError'])
+            result = gbl.RSLT_ERROR
+    else:
+        print(gbl.StringRscs['SaveCanceled'])
+    
+    
+    return result
+
+def ExitApp():
+    result = gbl.RSLT_NONE
+    
+    print(gbl.StringRscs['ExitBanner'])
+    # If no changes to be lost
+    userinput = input(gbl.StringRscs['ExitPrompt'])
+    if(userinput in ('y','Y')):
+        print(gbl.StringRscs['ExitGoodbye'])
+        result = gbl.RSLT_EXIT
+    return result
+    
 if __name__ == "__main__":
     main();
 
