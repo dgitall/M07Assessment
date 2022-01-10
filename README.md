@@ -17,11 +17,14 @@ The application user is a member of the marketing team.
 This is a sample UI which you can use as your base UI. While your UI may be different, make sure functionality outlined in the sample UI is accounted for in your UI.
 
 ### Start Up
-'''
+
+```
 Holiday Management
 ===================
 There are 10 holidays stored in the system.
-'''
+```
+
+
 ### Main Menu
 <code>Holiday Menu
 ================
