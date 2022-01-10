@@ -1,5 +1,13 @@
 # M07Assessment
- 
+
+## How To Use
+* Clone all *.py files and the Data directory into a local directory
+* Run the MainApp.py file in your favorite python environment
+
+Note:
+* This was only tested on Python 3.9.7 and on the reference webscraping and APIs as they appear on January 9, 2022.
+* The Data folder contains holidays.json as a small starter list of holidays. You will have the option during startup to scrape additional holidays from the web. Any changes made to the list of holidays, including scraping holidays, and saving will overwrite your original holidays.json. An additional copy is provide in case you need to start over.
+
 ## Introduction
 Martin Luther King Day, Presidents Day, St. Patrick's Day, Easter, May Day, Independence Day for multiple cultures, International Talk Like a Pirate Day... these are just some of the many holidays out there.
 
