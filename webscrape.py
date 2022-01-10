@@ -27,6 +27,7 @@ class WebScraper:
     
         # Get the HTML from the website
         html = self.getHTML(url)
+
         # Parse the data
         soup = bs(html,'html.parser')
 

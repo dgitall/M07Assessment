@@ -18,6 +18,6 @@ class Holiday:
         return f"{self.name} ({self.date.strftime('%b %d, %Y')})"
     
     def makeDict(self):
-        output = {'name': self.name, 'date': self.date.strftime('%Y-%M-%d')}
+        output = {'name': self.name, 'date': self.date.strftime('%Y-%m-%d')}
         return output 
         

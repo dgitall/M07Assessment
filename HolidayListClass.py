@@ -2,10 +2,12 @@ from dataclasses import dataclass, field
 import json
 import datetime as dt
 from pprintpp import pprint as pp
+import requests
 
 import HolidayClass as HC
 import HolidayGlobals as gbl
 import webscrape
+import weatherdata as WD
           
            
 # -------------------------------------------
@@ -42,8 +44,17 @@ class HolidayList:
         result = gbl.RSLT_NOTFOUND
         foundHoliday = HC.Holiday()
         
+        ## If the date is a string instead of datetime try converting a couple
+        # of the formats use elsewhere
         if(isinstance(Date, str)):
-            Date = dt.datetime.strptime(Date, "%Y-%M-%d")
+            try:
+                Date = dt.datetime.strptime(Date, "%Y-%M-%d")
+            except:
+                try:
+                    Date = dt.datetime.strptime(Date, "%b %d, %Y")
+                except:
+                    print("ERROR: Date is incorrect format")
+                    return gbl.RSLT_ERROR
             
         index = 0
         if(self.numHolidays() != 0):
@@ -110,7 +121,7 @@ class HolidayList:
             # If not found, then create a new holiday object to add to the list
             if foundresult == gbl.RSLT_NOTFOUND:
                 # Change date to datetime type so we are consistent internally
-                date = dt.datetime.strptime(holiday['date'], "%Y-%M-%d") 
+                date = dt.datetime.strptime(holiday['date'], "%Y-%m-%d") 
                 newholiday = HC.Holiday(holiday['name'],date)
                 if(self.addHoliday(newholiday) != gbl.RSLT_NONE):
                     print("ERROR: Can't add holiday from JSON file")
@@ -181,35 +192,147 @@ class HolidayList:
             return gbl.RSLT_ERROR
     
     def filter_holidays_by_week(self, year, week_number):
-        result = 0
-        return result
         # Use a Lambda function to filter by week number and save this as holidays, use the filter on innerHolidays
         # Week number is part of the the Datetime object
         # Cast filter results as list
         # return your holidays
-
-    def displayHolidaysInWeek(self, holidayList):
-        result = 0
-        return result
+        result = gbl.RSLT_NONE
+        
+        holidays = []
+        for holiday in self.innerHolidays:
+            wknum = holiday.date.isocalendar()[1]
+            yr = holiday.date.year
+            if(holiday.date.isocalendar()[1] == week_number) and (holiday.date.year == year):
+                holidays.append(holiday)
+            
+        
+        return result, holidays
+    
+    
+    def displayHolidaysInWeek(self, holidayList, weatherList):
         # Use your filter_holidays_by_week to get list of holidays within a week as a parameter
         # Output formated holidays in the week. 
         # * Remember to use the holiday __str__ method.
+        result = gbl.RSLT_NONE        
+        
+        if(weatherList == None):
+            for holiday in holidayList:
+                print(holiday)
+        else:
+            for holiday in holidayList:
+                # Not this simple.  Need to go through the weatherlist and match the date of the holiday and print
+                # to account for the holiday list and weather list not being synchronized
+                date = holiday.date.date()
+                forecast = None
+                # forecast = filter(lambda fcast: fcast.date.date() == date, weatherList )
+                for weather in weatherList:
+                    if(weather.date.date() == date):
+                        forecast = weather 
+                        break
+                #forecast = list(forecast)
+                if(forecast == None):
+                    print(f"{holiday}")
+                else:
+                    print(f"{holiday} - {forecast}")
 
-    def getWeather(self, weekNum):
-        result = 0
+            
         return result
+    
+    
+    def getWeather(self):
         # Convert weekNum to range between two days
         # Use Try / Except to catch problems
         # Query API for weather in that week range
         # Format weather information and return weather string.
+        result = gbl.RSLT_NONE
+        
+        try:
+            url = "https://community-open-weather-map.p.rapidapi.com/forecast/daily"
 
-    def viewCurrentWeek(self):
-        result = 0
-        return result
+            querystring = {"q":"minneapolis,us","cnt":"14","units":"imperial","mode":"json"}
+
+            headers = {
+                'x-rapidapi-host': "community-open-weather-map.p.rapidapi.com",
+                'x-rapidapi-key': "15e6825722msh32a90b758c74ec6p192e2ejsnf2166368e925"
+                }
+
+            response = requests.request("GET", url, headers=headers, params=querystring)
+        except:
+            return gbl.RSLT_ERROR, None
+            
+            
+        WeatherDict = json.loads(response.text)
+        date = dt.datetime.now()
+        daydelta = dt.timedelta(days=1)
+        weatherList = []
+        for forecast in WeatherDict['list']:
+            hightemp = forecast['temp']['max']
+            weatherdescp = forecast['weather'][0]['description']
+            weather = WD.WeatherData(date, hightemp, weatherdescp.title())
+            weatherList.append(weather)
+            date = date + daydelta
+            
+        return result, weatherList
+    
+    
+    def viewCurrentWeek(self, showWeather):
         # Use the Datetime Module to look up current week and year
         # Use your filter_holidays_by_week function to get the list of holidays 
         # for the current week/year
         # Use your displayHolidaysInWeek function to display the holidays in the week
         # Ask user if they want to get the weather
         # If yes, use your getWeather function and display results
+        result = gbl.RSLT_NONE
+        
+        thisYear = dt.datetime.now().year
+        thisWeek = dt.datetime.now().isocalendar()[1]
+        
+        result, holidays = self.filter_holidays_by_week(thisYear, thisWeek)
+        weatherList = None
+        if(showWeather):
+            result, weatherList = self.getWeather()
+            if result != gbl.RSLT_NONE: print("Unable to retrieve weather")
+        self.displayHolidaysInWeek(holidays, weatherList)
+        
+        return result
+    
+    def viewNextWeek(self, showWeather):
 
+        result = gbl.RSLT_NONE
+        
+        thisYear = dt.datetime.now().year
+        nextWeek = dt.datetime.now().isocalendar()[1] + 1
+        if(nextWeek > 52): 
+            thisYear +=1
+            nextWeek = 1
+        
+        result, holidays = self.filter_holidays_by_week(thisYear, nextWeek)
+        weatherList = None
+        if(showWeather):
+            result, weatherList = self.getWeather()
+            if result != gbl.RSLT_NONE: print("Unable to retrieve weather")
+        self.displayHolidaysInWeek(holidays, weatherList)
+        
+        return result
+    
+    def viewAllWeeks(self, year, showWeather):
+
+        result = gbl.RSLT_NONE
+        
+        weatherList = None
+        if(showWeather):
+            result, weatherList = self.getWeather()
+            if result != gbl.RSLT_NONE: print("Unable to retrieve weather")      
+        
+        for week in range(1, 53):      
+            result, holidays = self.filter_holidays_by_week(year, week)
+            self.displayHolidaysInWeek(holidays, weatherList)
+        
+        return result
+    
+    
+if __name__ == "__main__":
+    HolidayList = HolidayList()
+    result, weatherList = HolidayList.getWeather()
+    for weather in weatherList:
+        print(weather)
