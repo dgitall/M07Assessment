@@ -197,15 +197,10 @@ class HolidayList:
         # Cast filter results as list
         # return your holidays
         result = gbl.RSLT_NONE
-        
-        holidays = []
-        for holiday in self.innerHolidays:
-            wknum = holiday.date.isocalendar()[1]
-            yr = holiday.date.year
-            if(holiday.date.isocalendar()[1] == week_number) and (holiday.date.year == year):
-                holidays.append(holiday)
+
+        holidays = filter(lambda holiday: (holiday.date.isocalendar()[1] == week_number) and (holiday.date.year == year), self.innerHolidays)
+        holidays = list(holidays)        
             
-        
         return result, holidays
     
     
@@ -220,20 +215,15 @@ class HolidayList:
                 print(holiday)
         else:
             for holiday in holidayList:
-                # Not this simple.  Need to go through the weatherlist and match the date of the holiday and print
-                # to account for the holiday list and weather list not being synchronized
+                # find the weather forecast matching the date of the holiday (if it exists)
                 date = holiday.date.date()
-                forecast = None
-                # forecast = filter(lambda fcast: fcast.date.date() == date, weatherList )
-                for weather in weatherList:
-                    if(weather.date.date() == date):
-                        forecast = weather 
-                        break
-                #forecast = list(forecast)
-                if(forecast == None):
+                forecast = filter(lambda weather: weather.date.date() == date, weatherList)
+                forecast = list(forecast)                
+
+                if(len(forecast) == 0):
                     print(f"{holiday}")
                 else:
-                    print(f"{holiday} - {forecast}")
+                    print(f"{holiday} - {forecast[0]}")
 
             
         return result
@@ -274,7 +264,7 @@ class HolidayList:
             
         return result, weatherList
     
-    
+    ## Show holidays (and weather) for this week    
     def viewCurrentWeek(self, showWeather):
         # Use the Datetime Module to look up current week and year
         # Use your filter_holidays_by_week function to get the list of holidays 
@@ -295,7 +285,8 @@ class HolidayList:
         self.displayHolidaysInWeek(holidays, weatherList)
         
         return result
-    
+
+    ## Show holidays (and weather) for next week    
     def viewNextWeek(self, showWeather):
 
         result = gbl.RSLT_NONE
@@ -315,6 +306,7 @@ class HolidayList:
         
         return result
     
+    ## Show holidays (and weather) for all days this year
     def viewAllWeeks(self, year, showWeather):
 
         result = gbl.RSLT_NONE

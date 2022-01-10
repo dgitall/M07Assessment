@@ -1,11 +1,11 @@
 # M07Assessment
 
-## How To Use
+## How To Install and Use
 * Clone all *.py files and the Data directory into a local directory
 * Run the MainApp.py file in your favorite python environment
 
 Note:
-* This was only tested on Python 3.9.7 and on the reference webscraping and APIs as they appear on January 9, 2022.
+* This was only tested on Python 3.9.7 and on the referenced webscraping and APIs as they appear on January 9, 2022.
 * The Data folder contains holidays.json as a small starter list of holidays. You will have the option during startup to scrape additional holidays from the web. Any changes made to the list of holidays, including scraping holidays, and saving will overwrite your original holidays.json. An additional copy is provide in case you need to start over.
 
 ## Introduction
@@ -101,8 +101,11 @@ National Rubber Ducky Day (2021-01-13)
 Tamil Thai Pongal Day (2021-01-14)
 National Bagel Day (2021-01-15)
 Signing of the Peace Accords (2021-01-16)
+```
+
 For the current week, the user should have an option to indicate whether they want to see the weather as well.
 
+```
 View Holidays
 =================
 Which year?: 2021

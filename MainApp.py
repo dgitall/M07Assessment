@@ -325,11 +325,11 @@ def printTheHolidays(HolidayList, AppState, year, week):
             result = HolidayList.viewCurrentWeek(ShowWeather)
             if(result != gbl.RSLT_NONE): print(gbl.StringRscs['ViewPrintError'])
         elif(week == gbl.NEXT_WEEK):
-            print(gbl.StringRscs['ViewPrintBanner2'])
+            print(gbl.StringRscs['ViewPrintBanner3'])
             result = HolidayList.viewNextWeek(ShowWeather)
             if(result != gbl.RSLT_NONE): print(gbl.StringRscs['ViewPrintError'])
         elif(week == gbl.ALL_WEEKS):
-            print(gbl.StringRscs['ViewPrintBanner2'])
+            print(gbl.StringRscs['ViewPrintBanner4'])
             result = HolidayList.viewAllWeeks(year, ShowWeather)
             if(result != gbl.RSLT_NONE): print(gbl.StringRscs['ViewPrintError'])  
         else:

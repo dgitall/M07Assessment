@@ -43,6 +43,8 @@
     "ViewWeatherPrompt": "Would you like to get a 14-day forecast? [y/n]: ",
     "ViewPrintBanner1": "These are the holidays for {year} week #{week}:",
     "ViewPrintBanner2": "\nThese are the holidays for this week:",
+    "ViewPrintBanner3": "\nThese are the holidays for next week:",
+    "ViewPrintBanner4": "\nThese are the holidays for this year:",
     "ViewPrintError": "\nError:\nUnable to print the holidays.",    
     "PickingPlayerOrder": "\nSelecting the contestant order......",    
     "FirstPlayerOrder": "First Contestant: {GamePlayers[0]['Player']['Name']}",
